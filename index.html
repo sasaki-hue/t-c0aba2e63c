@@ -121,10 +121,8 @@
   </div>
 
   <div class="row" style="border-top:1px dashed var(--border);padding-top:12px;margin-top:14px">
-    <div class="fld"><label>換算(円/枚)</label>
-      <input type="number" id="yen" value="20" min="1" step="1"></div>
-    <div class="fld"><label>&nbsp;</label><button id="run">計算する</button></div>
-    <span class="ref" style="align-self:center">コイン持ちの前提: 奇数設定 30.8G / 偶数設定 34.0G(50枚あたり)</span>
+    <div class="fld"><button id="run">計算する</button></div>
+    <span class="ref" style="align-self:center">コイン持ちの前提: 奇数設定 30.8G / 偶数設定 34.0G(50枚あたり)/ 円表示は20円換算</span>
   </div>
 </div>
 
@@ -352,7 +350,7 @@ function run() {
   if (!(N > 0) || !(K > 0)) { alert('総通常Gと初当り回数を入力してください'); return; }
 
   const baseKey = 'guki';   // 偶奇コインベースを既定(奇30.8G/偶34.0G。運用で確定予定)
-  const yen = +document.getElementById('yen').value || 20;
+  const yen = 20;           // 円表示は20円/枚 固定
   const shortfall = baseKey === 'guki' ? MK.ty_shortfall_guki : MK.ty_shortfall_base;
 
   const lamHall = K / N;
@@ -484,7 +482,7 @@ function run() {
     prev = r.ev;
   }
   let t = '<thead><tr><th>着席G</th><th>初当りまで<br>追加通常G</th><th>RUSH_TY<br>(枚)</th>'
-        + '<th>期待値<br>(枚)</th><th>期待値<br>(円)</th><th>出玉率<br>(ROI)</th>'
+        + '<th>期待値<br>(枚)</th><th>期待値(円)<br><span style="font-weight:normal">20円換算</span></th><th>出玉率<br>(ROI)</th>'
         + '<th>設定1の<br>可能性</th></tr></thead><tbody>';
   for (const g of bins) {
     const r = evalSeat(cur, w, g);
@@ -573,7 +571,7 @@ function renderWindow() {
   const span = end - Xg;
   const step = span <= 60 ? 1 : Math.ceil(span / 60);
   let t = '<thead><tr><th>終了G</th><th>当選率</th><th>回す通常G</th><th>平均獲得<br>(枚)</th>'
-        + '<th>期待値<br>(枚)</th><th>期待値<br>(円)</th><th>出玉率<br>(ROI)</th></tr></thead><tbody>';
+        + '<th>期待値<br>(枚)</th><th>期待値(円)<br><span style="font-weight:normal">20円換算</span></th><th>出玉率<br>(ROI)</th></tr></thead><tbody>';
   for (let e = Xg + step; e <= end; e += step) {
     const r = evalWindow(cur, w, Xg, e - Xg);
     if (!r) continue;
