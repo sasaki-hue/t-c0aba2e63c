@@ -61,6 +61,10 @@
   .leg{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:11.5px;margin-bottom:8px}
   .leg span{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
   .leg i{width:10px;height:10px;border-radius:2px;display:inline-block}
+  .radios{display:flex;gap:12px;flex-wrap:wrap;align-items:center;
+    border:1px solid var(--border);border-radius:3px;padding:7px 10px;background:#fff}
+  .radios label{display:inline-flex;align-items:center;gap:4px;font-size:12.5px;
+    color:var(--text);cursor:pointer;white-space:nowrap}
   tr.zone td{background:#F3F0E9 !important;color:#9A938A}
   tr.zone td.lab{background:#EBE6DC !important;color:#9A938A}
   .zonetag{font-size:9px;color:#B0662A;display:block;line-height:1.1}
@@ -164,6 +168,12 @@
           <option value="pp34">3〜4連</option>
           <option value="pp5">5連以上</option>
         </select></div>
+      <div class="fld"><label>設定の扱い</label>
+        <div class="radios">
+          <label><input type="radio" name="fixs" value="auto" checked>推定配分(自動)</label>
+          <label><input type="radio" name="fixs" value="s1">設定1想定</label>
+          <label><input type="radio" name="fixs" value="s2">設定2想定</label>
+        </div></div>
       <span class="ref" id="segInfo" style="align-self:center"></span>
     </div>
     <div class="scroll"><table id="tEV"></table></div>
@@ -508,12 +518,19 @@ function run(doScroll) {
 
   /* --- 4. 期待値表 --- */
   // 0〜37G は引き戻しゾーンで値が急変するので細かく刻む
+  // 設定の扱い: 自動(店データの事後確率で混合) or 特定設定に固定
+  const fixs = document.querySelector('input[name=fixs]:checked').value;
+  let wEV = w;
+  if (fixs !== 'auto') {
+    wEV = new Array(NS).fill(0);
+    wEV[fixs === 's1' ? 0 : 1] = 1;
+  }
   const bins = [37];
   for (let g = 50; g <= 1450; g += 50) bins.push(g);
   let t = '<thead><tr><th>着席G</th><th>サンプル数</th><th>初当り確率</th><th>RUSH_TY</th>'
         + '<th>期待値</th><th>出玉率</th></tr></thead><tbody>';
   for (const g of bins) {
-    const r = evalSeat(cur, w, g);
+    const r = evalSeat(cur, wEV, g);
     if (!r) continue;
     const cls = r.ev >= 0 ? 'plus' : 'minus';
     t += `<tr><td class="lab">${g}</td>`
@@ -614,6 +631,9 @@ function onSegChange() {
 }
 selPrev.addEventListener('change', onSegChange);
 selPP.addEventListener('change', onSegChange);
+document.querySelectorAll('input[name=fixs]').forEach(r => r.addEventListener('change', () => {
+  if (!document.getElementById('out').classList.contains('hide')) run(false);
+}));
 
 parseRows();
 </script>
