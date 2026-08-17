@@ -60,6 +60,17 @@
     color:#fff;text-shadow:0 0 3px rgba(0,0,0,.5);overflow:hidden}
   .note{font-size:11.5px;color:var(--sub);background:var(--panel);
     border:1px solid var(--border);border-radius:3px;padding:9px;margin-top:11px}
+  .confbox{border:1px solid var(--border);border-radius:4px;padding:11px 13px;margin-top:2px}
+  .confhead{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+  .confbadge{display:inline-flex;align-items:center;gap:6px;font-weight:bold;font-size:14px;
+    padding:4px 12px;border-radius:20px;color:#fff}
+  .confgauge{flex:1;min-width:140px;height:12px;background:#EFE8D8;border:1px solid var(--border);
+    border-radius:8px;overflow:hidden}
+  .confgauge i{display:block;height:100%;border-radius:8px}
+  .confmarks{display:flex;justify-content:space-between;font-size:9.5px;color:var(--muted);
+    margin-top:2px;padding:0 1px}
+  .conftext{font-size:12px;color:var(--text);margin-top:8px;line-height:1.7}
+  .confrange{font-size:11.5px;color:var(--sub);margin-top:5px}
   .note b{color:var(--minus)}
   .warn{background:#FDF0E6;border-color:var(--minus);color:#8a3520}
   .hide{display:none}
@@ -119,6 +130,7 @@
   <h2>2. 初当り確率</h2>
   <div class="card">
     <div class="kpi" id="kpi1"></div>
+    <div id="conf"></div>
     <div class="note" id="note1"></div>
   </div>
 
@@ -376,6 +388,41 @@ function run() {
     ['市場平均(1/' + (1 / MK.lam_obs).toFixed(1) + ')比',
       (diff >= 0 ? '+' : '') + diff.toFixed(1) + '%'],
   ].map(([k, v]) => `<div><span class="v">${v}</span><span class="k">${k}</span></div>`).join('');
+  /* --- 信頼度(初当り回数ベース。統計用語を使わず段階表示)--- */
+  const relse = Math.sqrt(MK.cv2_within / K);      // 初当り確率の相対ブレ(更新過程近似)
+  const d95 = 1.96 * relse;
+  const rLo = 1 / (lamHall * (1 + d95)), rHi = 1 / (lamHall * (1 - d95));
+  const TIERS = [
+    { min: 0, mark: '×', name: '参考程度', col: '#C0392B',
+      text: `コインを数回投げただけでは表裏の偏りが分からないのと同じで、初当り${K.toLocaleString()}回では`
+        + `偶然のブレと設定の差をまだ区別できません。下の設定配分は<b>市場平均に近い「仮の値」</b>、`
+        + `期待値表もその分だけ市場平均寄りの表示です。` },
+    { min: 150, mark: '△', name: '傾向が見える', col: '#D97E1F',
+      text: `大まかな傾向(設定1が中心か、偶数設定が混じっていそうか)は見えてきます。`
+        + `ただし各設定の%は、同じ店でもデータを取り直すたびに数%単位で動く段階です。断定はまだ早めに。` },
+    { min: 500, mark: '○', name: '大枠は信頼できる', col: '#6B8E23',
+      text: `配分の大枠(設定1がどのくらい厚いか、設定4以上が何%あるか)は信頼できるデータ量です。`
+        + `初当りの近い設定どうし(1と3など)の細かい区別は、この量でもまだできません。` },
+    { min: 1500, mark: '◎', name: '十分', col: '#2E7D32',
+      text: `設定推定として十分なデータ量です。それでも初当りの近い設定どうし(1と3など)は`
+        + `原理的に区別できないため、「設定1中心か / 偶数が混じるか」という群の読み方は変わりません。` },
+  ];
+  const tier = TIERS.filter(t => K >= t.min).pop();
+  const pct = Math.min(100, Math.sqrt(K / 2000) * 100);
+  document.getElementById('conf').innerHTML = `
+    <div class="confbox" style="border-left:5px solid ${tier.col}">
+      <div class="confhead">
+        <span class="confbadge" style="background:${tier.col}">${tier.mark} 信頼度: ${tier.name}</span>
+        <div style="flex:1;min-width:140px">
+          <div class="confgauge"><i style="width:${pct}%;background:${tier.col}"></i></div>
+          <div class="confmarks"><span>0回</span><span>150回=傾向</span><span>500回=大枠</span><span>1500回=十分</span></div>
+        </div>
+      </div>
+      <div class="conftext">${tier.text}</div>
+      <div class="confrange">初当り確率のブレ幅(だいたいの範囲): <b>1/${rLo.toFixed(0)} 〜 1/${rHi.toFixed(0)}</b>
+        — 同じ店でも、データを取り直すとこの範囲で変わり得ます。</div>
+    </div>`;
+
   document.getElementById('note1').innerHTML =
     `市場平均より${diff >= 0 ? '<b>軽い</b>' : '重い'}(+は軽い=当たりやすい)。`
     + `公表定義との塊境界のズレを α=${MK.alpha} で補正し、公表基準では 1/${(1/lamPub).toFixed(1)} 相当として設定を推定します。`
