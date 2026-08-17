@@ -150,15 +150,18 @@
   <h2>4. 着席G別 期待値表</h2>
   <div class="card">
     <div class="row" style="margin-top:0;margin-bottom:10px">
-      <div class="fld"><label>前回の状況</label>
+      <div class="fld"><label>状況(最初に選択)</label>
+        <select id="segTop">
+          <option value="sonota">朝イチ以外(前回あり)</option>
+          <option value="asaichi">朝イチ</option>
+        </select></div>
+      <div class="fld"><label>前回の連チャン</label>
         <select id="segPrev">
-          <option value="all">指定なし(全体平均)</option>
-          <option value="asaichi">朝イチ(前回不明)</option>
-          <option value="p1">前回 単発</option>
-          <option value="p2">前回 2連</option>
-          <option value="p34">前回 3〜4連</option>
-          <option value="p59">前回 5〜9連</option>
-          <option value="p10">前回 10連以上</option>
+          <option value="p1">単発</option>
+          <option value="p2">2連</option>
+          <option value="p34">3〜4連</option>
+          <option value="p59">5〜9連</option>
+          <option value="p10">10連以上</option>
         </select></div>
       <div class="fld"><label>前々回の連チャン(前回=単発のときのみ)</label>
         <select id="segPP" disabled>
@@ -283,6 +286,7 @@ function estimate(targetMean, targetCV) {
 let CURVE = { haz: g => D.hazard[g], ty: g => D.ty[g], ar: g => D.at_risk[g], n: null };
 
 function segKey() {
+  if (document.getElementById('segTop').value === 'asaichi') return 'asaichi';
   const p = document.getElementById('segPrev').value;
   const pp = document.getElementById('segPP').value;
   return (p === 'p1' && pp) ? 'p1_' + pp : p;
@@ -621,14 +625,18 @@ function renderWindow() {
     + `<b>37G以内の当選は連荘扱い(引き戻しゾーン)</b>なので、32→37 の窓はこのゾーンの拾いです。`;
 }
 
-/* 状況セレクトの連動: 前々回は前回=単発のときだけ有効。変更で表を再計算 */
+/* 状況セレクトの連動: 朝イチなら連チャン系は無効。前々回は前回=単発のときだけ有効 */
+const selTop = document.getElementById('segTop');
 const selPrev = document.getElementById('segPrev');
 const selPP = document.getElementById('segPP');
 function onSegChange() {
-  selPP.disabled = selPrev.value !== 'p1';
+  const asa = selTop.value === 'asaichi';
+  selPrev.disabled = asa;
+  selPP.disabled = asa || selPrev.value !== 'p1';
   if (selPP.disabled) selPP.value = '';
   if (!document.getElementById('out').classList.contains('hide')) run(false);  // その場に留まる
 }
+selTop.addEventListener('change', onSegChange);
 selPrev.addEventListener('change', onSegChange);
 selPP.addEventListener('change', onSegChange);
 document.querySelectorAll('input[name=fixs]').forEach(r => r.addEventListener('change', () => {
