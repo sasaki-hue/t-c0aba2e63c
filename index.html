@@ -375,9 +375,9 @@ function evalWindow(cur, w, Xg, Bg) {
 }
 
 /* ---------- 実行 ---------- */
-document.getElementById('run').onclick = run;
+document.getElementById('run').onclick = () => run(true);
 
-function run() {
+function run(doScroll) {
   let N, K, rows = [];
   if (mode === 'rows') { const p = parseRows(); rows = p.rows; N = p.N; K = p.K; }
   else { N = +document.getElementById('tN').value; K = +document.getElementById('tK').value; }
@@ -549,7 +549,9 @@ function run() {
 
   LAST = { cur, w, yen };
   document.getElementById('out').classList.remove('hide');
-  document.getElementById('out').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  if (doScroll) {
+    document.getElementById('out').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
 }
 
 /* ---------- 窓評価の描画(セクション5は現在非表示。evalWindow は残置)---------- */
@@ -608,7 +610,7 @@ const selPP = document.getElementById('segPP');
 function onSegChange() {
   selPP.disabled = selPrev.value !== 'p1';
   if (selPP.disabled) selPP.value = '';
-  if (!document.getElementById('out').classList.contains('hide')) run();
+  if (!document.getElementById('out').classList.contains('hide')) run(false);  // その場に留まる
 }
 selPrev.addEventListener('change', onSegChange);
 selPP.addEventListener('change', onSegChange);
