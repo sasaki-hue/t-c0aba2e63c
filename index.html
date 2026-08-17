@@ -121,14 +121,10 @@
   </div>
 
   <div class="row" style="border-top:1px dashed var(--border);padding-top:12px;margin-top:14px">
-    <div class="fld"><label>コインベースの前提</label>
-      <select id="base">
-        <option value="base">公表 30.8G/50枚(全設定共通)</option>
-        <option value="guki">奇数30.8G / 偶数34.0G(偶奇ベース説)</option>
-      </select></div>
     <div class="fld"><label>換算(円/枚)</label>
       <input type="number" id="yen" value="20" min="1" step="1"></div>
     <div class="fld"><label>&nbsp;</label><button id="run">計算する</button></div>
+    <span class="ref" style="align-self:center">コイン持ちの前提: 奇数設定 30.8G / 偶数設定 34.0G(50枚あたり)</span>
   </div>
 </div>
 
@@ -355,7 +351,7 @@ function run() {
   else { N = +document.getElementById('tN').value; K = +document.getElementById('tK').value; }
   if (!(N > 0) || !(K > 0)) { alert('総通常Gと初当り回数を入力してください'); return; }
 
-  const baseKey = document.getElementById('base').value;
+  const baseKey = 'guki';   // 偶奇コインベースを既定(奇30.8G/偶34.0G。運用で確定予定)
   const yen = +document.getElementById('yen').value || 20;
   const shortfall = baseKey === 'guki' ? MK.ty_shortfall_guki : MK.ty_shortfall_base;
 
@@ -512,7 +508,7 @@ function run() {
     ['ボーダー(期待値0)', border != null ? border + ' G' : '—'],
     ['着席50G の期待値', (s50.ev >= 0 ? '+' : '') + s50.ev.toFixed(0) + ' 枚'],
     ['着席1000G の期待値', (s1000.ev >= 0 ? '+' : '') + s1000.ev.toFixed(0) + ' 枚'],
-    ['前提', baseKey === 'guki' ? '偶奇ベース説' : '公表30.8G'],
+    ['コイン持ち前提', '奇30.8 / 偶34.0'],
   ].map(([k, v]) => `<div><span class="v">${v}</span><span class="k">${k}</span></div>`).join('');
   document.getElementById('note3').innerHTML =
     `着席G = 台が表示する<b>前回信号からのG</b>。「<b>当選するまで打ち、当たったらRUSHを完走してヤメ</b>」`
