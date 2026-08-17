@@ -145,7 +145,6 @@
 
   <h2>4. 着席G別 期待値表</h2>
   <div class="card">
-    <div class="kpi" id="kpi3"></div>
     <div class="scroll"><table id="tEV"></table></div>
     <div class="note" id="note3"></div>
   </div>
@@ -439,7 +438,6 @@ function run() {
   document.getElementById('leg').innerHTML = w.map((x, i) =>
     `<span><i style="background:${PAL[i]}"></i>${S.labels[i]} ${(x * 100).toFixed(1)}%</span>`).join('');
 
-  const seat0 = evalSeat(cur, w, 0);
   let h = '<thead><tr><th>設定</th><th>推定比率</th><th>公表 初当り</th>'
         + '<th>推定 出玉率</th><th>(参考)公表機械割</th></tr></thead><tbody>';
   for (let s = 0; s < NS; s++) {
@@ -474,13 +472,6 @@ function run() {
   // 0〜37G は引き戻しゾーンで値が急変するので細かく刻む
   const bins = [0, 10, 20, 30, 37, 40];
   for (let g = 50; g <= 1450; g += 50) bins.push(g);
-  let border = null, prev = null;
-  for (let g = 0; g <= GMAX; g++) {
-    const r = evalSeat(cur, w, g);
-    if (!r) continue;
-    if (prev !== null && prev < 0 && r.ev >= 0 && border === null && g > 40) border = g;
-    prev = r.ev;
-  }
   let t = '<thead><tr><th>着席G</th><th>初当りまで<br>追加通常G</th><th>RUSH_TY<br>(枚)</th>'
         + '<th>期待値<br>(枚)</th><th>期待値(円)<br><span style="font-weight:normal">20円換算</span></th><th>出玉率<br>(ROI)</th>'
         + '<th>設定1の<br>可能性</th></tr></thead><tbody>';
@@ -500,14 +491,6 @@ function run() {
   t += '</tbody>';
   document.getElementById('tEV').innerHTML = t;
 
-  const s50 = evalSeat(cur, w, 50);
-  const s1000 = evalSeat(cur, w, 1000);
-  document.getElementById('kpi3').innerHTML = [
-    ['ボーダー(期待値0)', border != null ? border + ' G' : '—'],
-    ['着席50G の期待値', (s50.ev >= 0 ? '+' : '') + s50.ev.toFixed(0) + ' 枚'],
-    ['着席1000G の期待値', (s1000.ev >= 0 ? '+' : '') + s1000.ev.toFixed(0) + ' 枚'],
-    ['コイン持ち前提', '奇30.8 / 偶34.0'],
-  ].map(([k, v]) => `<div><span class="v">${v}</span><span class="k">${k}</span></div>`).join('');
   document.getElementById('note3').innerHTML =
     `着席G = 台が表示する<b>前回信号からのG</b>。「<b>当選するまで打ち、当たったらRUSHを完走してヤメ</b>」`
     + `が前提です(予算無限)。RUSH_TY はそこから塊の終わりまでの出玉。`
