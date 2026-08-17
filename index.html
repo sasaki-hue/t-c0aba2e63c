@@ -473,18 +473,15 @@ function run() {
   const bins = [37];
   for (let g = 50; g <= 1450; g += 50) bins.push(g);
   let t = '<thead><tr><th>着席G</th><th>初当り確率</th><th>RUSH_TY</th>'
-        + '<th>期待値</th><th>出玉率</th><th>設定1の可能性</th></tr></thead><tbody>';
+        + '<th>期待値</th><th>出玉率</th></tr></thead><tbody>';
   for (const g of bins) {
     const r = evalSeat(cur, w, g);
     if (!r) continue;
-    const isZone = g <= 37;                       // 引戻し域 = 参考値(選択バイアスで過大)
-    const cls = isZone ? 'ref' : (r.ev >= 0 ? 'plus' : 'minus');
-    t += `<tr${isZone ? ' class="zone"' : ''}><td class="lab">${g}`
-      + (isZone ? '<span class="zonetag">引戻し域<br>参考値</span>' : '')
-      + `</td><td>1/${r.add.toFixed(0)}</td><td>${r.ty.toFixed(0)}</td>`
+    const cls = r.ev >= 0 ? 'plus' : 'minus';
+    t += `<tr><td class="lab">${g}</td>`
+      + `<td>1/${r.add.toFixed(0)}</td><td>${r.ty.toFixed(0)}</td>`
       + `<td class="${cls}">${r.ev >= 0 ? '+' : ''}${Math.round(r.ev * yen).toLocaleString()}</td>`
-      + `<td class="${cls}">${(r.roi * 100).toFixed(1)}%</td>`
-      + `<td class="ref">${(r.post[0] * 100).toFixed(0)}%</td></tr>`;
+      + `<td class="${cls}">${(r.roi * 100).toFixed(1)}%</td></tr>`;
   }
   t += '</tbody>';
   document.getElementById('tEV').innerHTML = t;
@@ -494,11 +491,8 @@ function run() {
     + `が前提です(予算無限)。初当り確率=そのG以降の平均的な当たりやすさ(1Gあたり)。`
     + `RUSH_TY=当選から塊の終わりまでの出玉(枚)。期待値=円(1枚20円換算)。`
     + `ヤメ判断補正 ${SP.yame_hosei_g}G と MAX BET 補正 ${SP.max_bet_corr}枚/回 を織り込み済み。`
-    + `着席が深いほど低設定の可能性が上がる効果(右端の列)も反映しています。<br>`
-    + `<b>グレーの 0〜37G 行(引戻し域)は鵜呑みにしないでください。</b>`
-    + `数字が大きいのは「連チャンの続きをそのまま貰えた場合」の平均だからで、`
-    + `実際にこのG数で空いている台は<b>前の人が理由あってヤメた台</b>に偏ります(有利な台は空かない)。`
-    + `理論上の上限と考え、実戦の「32G→37Gまで回してヤメ」は下の窓評価を使ってください。`;
+    + `着席が深いほど低設定の可能性が上がる効果も反映しています。`
+    + `37G以内のゾーン狙い(32G→37Gまで回してヤメ 等)は下の窓評価を使ってください。`;
 
   document.getElementById('method').innerHTML = `
     <b>① 初当り確率 → 設定配分</b><br>
