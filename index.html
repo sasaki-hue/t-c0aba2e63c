@@ -470,11 +470,10 @@ function run() {
 
   /* --- 4. 期待値表 --- */
   // 0〜37G は引き戻しゾーンで値が急変するので細かく刻む
-  const bins = [0, 10, 20, 30, 37, 40];
+  const bins = [37];
   for (let g = 50; g <= 1450; g += 50) bins.push(g);
-  let t = '<thead><tr><th>着席G</th><th>初当りまで<br>追加通常G</th><th>RUSH_TY<br>(枚)</th>'
-        + '<th>期待値<br>(枚)</th><th>期待値(円)<br><span style="font-weight:normal">20円換算</span></th><th>出玉率<br>(ROI)</th>'
-        + '<th>設定1の<br>可能性</th></tr></thead><tbody>';
+  let t = '<thead><tr><th>着席G</th><th>初当り確率</th><th>RUSH_TY</th>'
+        + '<th>期待値</th><th>出玉率</th><th>設定1の可能性</th></tr></thead><tbody>';
   for (const g of bins) {
     const r = evalSeat(cur, w, g);
     if (!r) continue;
@@ -482,8 +481,7 @@ function run() {
     const cls = isZone ? 'ref' : (r.ev >= 0 ? 'plus' : 'minus');
     t += `<tr${isZone ? ' class="zone"' : ''}><td class="lab">${g}`
       + (isZone ? '<span class="zonetag">引戻し域<br>参考値</span>' : '')
-      + `</td><td>${r.add.toFixed(0)}</td><td>${r.ty.toFixed(0)}</td>`
-      + `<td class="${cls}">${r.ev >= 0 ? '+' : ''}${r.ev.toFixed(0)}</td>`
+      + `</td><td>1/${r.add.toFixed(0)}</td><td>${r.ty.toFixed(0)}</td>`
       + `<td class="${cls}">${r.ev >= 0 ? '+' : ''}${Math.round(r.ev * yen).toLocaleString()}</td>`
       + `<td class="${cls}">${(r.roi * 100).toFixed(1)}%</td>`
       + `<td class="ref">${(r.post[0] * 100).toFixed(0)}%</td></tr>`;
@@ -493,7 +491,8 @@ function run() {
 
   document.getElementById('note3').innerHTML =
     `着席G = 台が表示する<b>前回信号からのG</b>。「<b>当選するまで打ち、当たったらRUSHを完走してヤメ</b>」`
-    + `が前提です(予算無限)。RUSH_TY はそこから塊の終わりまでの出玉。`
+    + `が前提です(予算無限)。初当り確率=そのG以降の平均的な当たりやすさ(1Gあたり)。`
+    + `RUSH_TY=当選から塊の終わりまでの出玉(枚)。期待値=円(1枚20円換算)。`
     + `ヤメ判断補正 ${SP.yame_hosei_g}G と MAX BET 補正 ${SP.max_bet_corr}枚/回 を織り込み済み。`
     + `着席が深いほど低設定の可能性が上がる効果(右端の列)も反映しています。<br>`
     + `<b>グレーの 0〜37G 行(引戻し域)は鵜呑みにしないでください。</b>`
