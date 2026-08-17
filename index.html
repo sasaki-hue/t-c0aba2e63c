@@ -146,21 +146,6 @@
   <h2>4. 着席G別 期待値表</h2>
   <div class="card">
     <div class="scroll"><table id="tEV"></table></div>
-    <div class="note" id="note3"></div>
-  </div>
-
-  <h2>5. 有限窓評価(ゾーン拾い: 着席X→終了Gまで回してヤメ)</h2>
-  <div class="card">
-    <div class="row" style="margin-top:0">
-      <div class="fld"><label>着席G(X)</label>
-        <input type="number" id="wX" value="32" min="0" max="1450" step="1"></div>
-      <div class="fld"><label>終了G(ここまで回してヤメ)</label>
-        <input type="number" id="wEnd" value="37" min="1" max="1499" step="1"></div>
-      <div class="fld"><label>&nbsp;</label><button class="sub" id="wRun">窓を評価</button></div>
-    </div>
-    <div class="kpi" id="kpiW" style="margin-top:12px"></div>
-    <div class="scroll"><table id="tW"></table></div>
-    <div class="note" id="noteW"></div>
   </div>
 
   <details>
@@ -486,13 +471,6 @@ function run() {
   t += '</tbody>';
   document.getElementById('tEV').innerHTML = t;
 
-  document.getElementById('note3').innerHTML =
-    `着席G = 台が表示する<b>前回信号からのG</b>。「<b>当選するまで打ち、当たったらRUSHを完走してヤメ</b>」`
-    + `が前提です(予算無限)。初当り確率=そのG以降の平均的な当たりやすさ(1Gあたり)。`
-    + `RUSH_TY=当選から塊の終わりまでの出玉(枚)。期待値=円(1枚20円換算)。`
-    + `ヤメ判断補正 ${SP.yame_hosei_g}G と MAX BET 補正 ${SP.max_bet_corr}枚/回 を織り込み済み。`
-    + `着席が深いほど低設定の可能性が上がる効果も反映しています。`
-    + `37G以内のゾーン狙い(32G→37Gまで回してヤメ 等)は下の窓評価を使ってください。`;
 
   document.getElementById('method').innerHTML = `
     <b>① 初当り確率 → 設定配分</b><br>
@@ -516,16 +494,16 @@ function run() {
     ・市場配分の事前分布は解析期間(${D.meta.period[0]}〜${D.meta.period[1]})のものです。`;
 
   LAST = { cur, w, yen };
-  renderWindow();
   document.getElementById('out').classList.remove('hide');
   document.getElementById('out').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-/* ---------- 窓評価の描画 ---------- */
+/* ---------- 窓評価の描画(セクション5は現在非表示。evalWindow は残置)---------- */
 let LAST = null;
-document.getElementById('wRun').onclick = renderWindow;
 
 function renderWindow() {
+  return;  // セクション5 非表示中
+  /* eslint-disable no-unreachable */
   if (!LAST) return;
   const { cur, w, yen } = LAST;
   const Xg = Math.max(0, Math.round(+document.getElementById('wX').value || 0));
