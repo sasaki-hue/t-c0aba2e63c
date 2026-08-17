@@ -446,14 +446,13 @@ function run() {
     `<span><i style="background:${PAL[i]}"></i>${S.labels[i]} ${(x * 100).toFixed(1)}%</span>`).join('');
 
   const seat0 = evalSeat(cur, w, 0);
-  let h = '<thead><tr><th>設定</th><th>推定比率</th><th>市場の推定配分</th><th>公表 初当り</th>'
+  let h = '<thead><tr><th>設定</th><th>推定比率</th><th>公表 初当り</th>'
         + '<th>推定 出玉率</th><th>(参考)公表機械割</th></tr></thead><tbody>';
   for (let s = 0; s < NS; s++) {
     const cu = cur[s];
     const m = 1 + (cu.ltMkt - cu.c) / (3 + 3 * cu.ltMkt / SP.at_net_gain);
     h += `<tr><td class="lab">${S.labels[s]}</td>`
       + `<td><b>${(w[s] * 100).toFixed(1)}%</b></td>`
-      + `<td class="ref">${(D.prior[s] * 100).toFixed(1)}%</td>`
       + `<td class="ref">1/${S.lam_den[s]}</td>`
       + `<td class="${m >= 1 ? 'plus' : 'minus'}">${(m * 100).toFixed(1)}%</td>`
       + `<td class="ref">${(S.kohyo_m[s] * 100).toFixed(1)}%</td></tr>`;
